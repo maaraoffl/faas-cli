@@ -56,6 +56,9 @@ type Function struct {
 
 	// Annotations
 	Annotations *map[string]string `yaml:"annotations"`
+
+	// Namespace
+	Namespace string `yaml:"namespace"`
 }
 
 // FunctionResources Memory and CPU

@@ -49,6 +49,8 @@ type CreateFunctionRequest struct {
 	// ReadOnlyRootFilesystem removes write-access from the root filesystem
 	// mount-point.
 	ReadOnlyRootFilesystem bool `json:"readOnlyRootFilesystem"`
+
+	Namespace string `json:"namespace"`
 }
 
 // FunctionResources Memory and CPU
@@ -75,6 +77,8 @@ type Function struct {
 	// Annotations are metadata for functions which may be used by the
 	// back-end for management, orchestration, events and build tasks
 	Annotations *map[string]string `json:"annotations"`
+
+	Namespace string `json:"namespace"`
 }
 
 // AsyncReport is the report from a function executed on a queue worker.

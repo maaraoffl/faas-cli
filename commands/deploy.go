@@ -36,12 +36,14 @@ type DeployFlags struct {
 	secrets                []string
 	labelOpts              []string
 	sendRegistryAuth       bool
+	namespace              string
 }
 
 var deployFlags DeployFlags
 
 func init() {
 	// Setup flags that are used by multiple commands (variables defined in faas.go)
+	deployCmd.Flags().StringVar(&deployFlags.namespace, "namespace", "", "Namespace should be used")
 	deployCmd.Flags().StringVar(&fprocess, "fprocess", "", "fprocess value to be run as a serverless function by the watchdog")
 	deployCmd.Flags().StringVarP(&gateway, "gateway", "g", defaultGateway, "Gateway URL starting with http(s)://")
 	deployCmd.Flags().StringVar(&handler, "handler", "", "Directory with handler for function, e.g. handler.js")
@@ -171,6 +173,10 @@ func runDeployCommand(args []string, image string, fprocess string, functionName
 				functionConstraints = deployFlags.constraints
 			}
 
+			if len(deployFlags.namespace) > 0 {
+				function.Namespace = deployFlags.namespace
+			}
+
 			if len(function.Secrets) > 0 {
 				deployFlags.secrets = mergeSlice(function.Secrets, deployFlags.secrets)
 			}
@@ -249,7 +255,9 @@ Error: %s`, fprocessErr.Error())
 				function.ReadOnlyRootFilesystem = deployFlags.readOnlyRootFilesystem
 			}
 
-			statusCode := proxy.DeployFunction(function.FProcess, services.Provider.GatewayURL, function.Name, function.Image, function.RegistryAuth, function.Language, deployFlags.replace, allEnvironment, services.Provider.Network, functionConstraints, deployFlags.update, deployFlags.secrets, allLabels, annotations, functionResourceRequest1, function.ReadOnlyRootFilesystem, tlsInsecure)
+			fmt.Printf("deploy the function at %s\n", function.Namespace)
+
+			statusCode := proxy.DeployFunction(function.Namespace, function.FProcess, services.Provider.GatewayURL, function.Name, function.Image, function.RegistryAuth, function.Language, deployFlags.replace, allEnvironment, services.Provider.Network, functionConstraints, deployFlags.update, deployFlags.secrets, allLabels, annotations, functionResourceRequest1, function.ReadOnlyRootFilesystem, tlsInsecure)
 			if badStatusCode(statusCode) {
 				failedStatusCodes[k] = statusCode
 			}
@@ -315,7 +323,7 @@ func deployImage(
 
 	functionResourceRequest1 := proxy.FunctionResourceRequest{}
 	var noAnnotations map[string]string = nil
-	statusCode = proxy.DeployFunction(fprocess, gateway, functionName,
+	statusCode = proxy.DeployFunction(namespace, fprocess, gateway, functionName,
 		image, registryAuth, language,
 		deployFlags.replace, envvars, network,
 		deployFlags.constraints, deployFlags.update, deployFlags.secrets,

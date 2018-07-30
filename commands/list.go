@@ -18,6 +18,7 @@ var (
 
 func init() {
 	// Setup flags that are used by multiple commands (variables defined in faas.go)
+	listCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Namespace should be used")
 	listCmd.Flags().StringVarP(&gateway, "gateway", "g", defaultGateway, "Gateway URL starting with http(s)://")
 
 	listCmd.Flags().BoolVarP(&verboseList, "verbose", "v", false, "Verbose output for the function list")
@@ -54,7 +55,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	gatewayAddress = getGatewayURL(gateway, defaultGateway, yamlGateway, os.Getenv(openFaaSURLEnvironment))
 
-	functions, err := proxy.ListFunctions(gatewayAddress, tlsInsecure)
+	functions, err := proxy.ListFunctions(namespace, gatewayAddress, tlsInsecure)
 	if err != nil {
 		return err
 	}

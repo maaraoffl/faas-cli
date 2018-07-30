@@ -16,14 +16,23 @@ import (
 )
 
 // ListFunctions list deployed functions
-func ListFunctions(gateway string, tlsInsecure bool) ([]requests.Function, error) {
+func ListFunctions(namespace, gateway string, tlsInsecure bool) ([]requests.Function, error) {
 	var results []requests.Function
 
 	gateway = strings.TrimRight(gateway, "/")
 	timeout := 60 * time.Second
 	client := MakeHTTPClient(&timeout, tlsInsecure)
 
-	getRequest, err := http.NewRequest(http.MethodGet, gateway+"/system/functions", nil)
+	resourceUrl := ""
+	if len(namespace) > 0 {
+		resourceUrl = gateway + "/system/functions" + "?namespace=" + namespace
+	} else {
+		resourceUrl = gateway + "/system/functions"
+	}
+
+	fmt.Printf("Making call to list functions with this endpoint: %s\n", resourceUrl)
+
+	getRequest, err := http.NewRequest(http.MethodGet, resourceUrl, nil)
 	SetAuth(getRequest, gateway)
 	if err != nil {
 		return nil, fmt.Errorf("cannot connect to OpenFaaS on URL: %s", gateway)

@@ -53,6 +53,8 @@ func InvokeFunction(gateway string, name string, bytesIn *[]byte, contentType st
 
 	gatewayURL := gateway + functionEndpoint + name + qs
 
+	fmt.Println(gatewayURL)
+
 	req, err := http.NewRequest(httpMethod, gatewayURL, reader)
 	if err != nil {
 		fmt.Println()
