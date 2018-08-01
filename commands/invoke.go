@@ -23,6 +23,8 @@ var (
 
 func init() {
 	// Setup flags that are used by multiple commands (variables defined in faas.go)
+
+	invokeCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Namespace should be used")
 	invokeCmd.Flags().StringVar(&functionName, "name", "", "Name of the deployed function")
 	invokeCmd.Flags().StringVarP(&gateway, "gateway", "g", defaultGateway, "Gateway URL starting with http(s)://")
 
@@ -83,7 +85,7 @@ func runInvoke(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("unable to read standard input: %s", err.Error())
 	}
 
-	response, err := proxy.InvokeFunction(gatewayAddress, functionName, &functionInput, contentType, query, headers, invokeAsync, httpMethod, tlsInsecure)
+	response, err := proxy.InvokeFunction(namespace, gatewayAddress, functionName, &functionInput, contentType, query, headers, invokeAsync, httpMethod, tlsInsecure)
 	if err != nil {
 		return err
 	}

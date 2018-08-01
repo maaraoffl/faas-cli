@@ -16,7 +16,7 @@ import (
 )
 
 // InvokeFunction a function
-func InvokeFunction(gateway string, name string, bytesIn *[]byte, contentType string, query []string, headers []string, async bool, httpMethod string, tlsInsecure bool) (*[]byte, error) {
+func InvokeFunction(namespace, gateway string, name string, bytesIn *[]byte, contentType string, query []string, headers []string, async bool, httpMethod string, tlsInsecure bool) (*[]byte, error) {
 	var resBytes []byte
 
 	gateway = strings.TrimRight(gateway, "/")
@@ -30,6 +30,8 @@ func InvokeFunction(gateway string, name string, bytesIn *[]byte, contentType st
 		TLSClientConfig:   &tls.Config{InsecureSkipVerify: tlsInsecure},
 	}
 	client.Transport = tr
+
+	query = append(query, "namespace="+namespace)
 
 	qs, qsErr := buildQueryString(query)
 	if qsErr != nil {
@@ -53,7 +55,7 @@ func InvokeFunction(gateway string, name string, bytesIn *[]byte, contentType st
 
 	gatewayURL := gateway + functionEndpoint + name + qs
 
-	fmt.Println(gatewayURL)
+	fmt.Printf("Printing invoke function url: %s\n", gatewayURL)
 
 	req, err := http.NewRequest(httpMethod, gatewayURL, reader)
 	if err != nil {
